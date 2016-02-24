@@ -147,7 +147,7 @@ ssh -v -i ~/.ssh/private-key core@<instance-ip>
 
 enable verbose debug output to see which keys are accepted/refused
 
-## Liability
+## Disclaimer
 
 I created this application to solve the problem of ssh access control on a small scale (~100 instances; <10 developers) and mainly to prove the concept of an idea I had. I make **no claims** as to its fitness for production or large-scale environments, and would advise you to fully understand the the code and various points of failure of the solution before you think of using it yourself.
 
