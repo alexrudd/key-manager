@@ -120,6 +120,39 @@ Although it's easy enough to manage the s3 access groups manually, I have also i
 * `make create_group group=new-group` - Creates a new group folder with an empty authorized_keys file
 * `make add_key group=new-group key="ssh-rsa AAA...E4YU= comment"` - Appends a key to an existing group's authorized_keys file
 
+## CloudFormation Example
+
+I've included a [CloudFormation](https://aws.amazon.com/cloudformation/) template which launches a single instance setup to use key-manager. You can then experiment adding tags, creating access groups, and adding/revoking keys.
+
+To launch the instance, go to the CloudFormation dashboard of your AWS account and click on **Create Stack**. Select to 'Upload a template to Amazon S3' and choose the [key-manager-example.cft](key-manager-example.cft) template from your local file system.
+
+Name your stack and populate the template's parameters:
+
+* **AccessGroupsTag** - The initial value of the 'access-groups' instance tag
+* **InstanceType** - t2.micro, t2.small, or t2.medium
+* **Key** - The SSH key pair used for emergency access to the instance
+* **S3Bucket** - The pre-existing s3 bucket which will store your access group keys
+* **S3BucketRegion** - The [region](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) in which your s3 bucket is located
+* **Subnet** - The Subnet within the VPC to deploy the instance to
+* **TrustedIpBlock** - The CIDR IP block to allow ssh connections from (ssh user is "core")
+* **VPC** - The AWS Virtual Private Cloud to deploy this registry to
+
+Once you've filled out the template's parameters, click through to the 'Review' page and and tick the box that acknowledges the template creates IAM resources. Click 'Create' and wait for your stack to finish creating all the template resources and show status: `CREATE_COMPLETE`
+
+Attempt to SSH to the instance using it's IP (from the stack outputs or ec2 intance dashboard) and the username 'core':
+
+```bash
+ssh -v -i ~/.ssh/private-key core@<instance-ip>
+```
+
+enable verbose debug output to see which keys are accepted/refused
+
+## Liability
+
+I created this application to solve the problem of ssh access control on a small scale (~100 instances; <10 developers) and mainly to prove the concept of an idea I had. I make **no claims** as to its fitness for production or large-scale environments, and would advise you to fully understand the the code and various points of failure of the solution before you think of using it yourself.
+
+Saying that, I welcome any suggestions that could make this project safer, faster, and better suited to the problem at hand.
+
 ## Building
 
 Makefile has been provided for convenience. Uses the Golang docker image to compile the source and dependencies so no local install on Golang is needed.
