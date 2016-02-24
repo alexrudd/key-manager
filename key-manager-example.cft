@@ -135,22 +135,13 @@
         },
         "Path": "/",
         "Policies": [ {
-          "PolicyName": "key-management",
+          "PolicyName": "key-manager",
           "PolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [
               {
                 "Action": [
-                  "s3:ListBucket",
-                  "s3:GetBucketLocation"
-                ],
-                "Effect": "Allow",
-                "Resource": { "Fn::Join": [ "", [ "arn:aws:s3:::", {"Ref": "S3Bucket"} ]]}
-              },
-              {
-                "Action": [
-                  "s3:List*",
-                  "s3:Get*"
+                  "s3:GetObject"
                 ],
                 "Effect": "Allow",
                 "Resource": { "Fn::Join": [ "", [ "arn:aws:s3:::", {"Ref": "S3Bucket"} ,"/*" ]]}
