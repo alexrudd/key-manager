@@ -47,16 +47,16 @@ create_group:
 	else \
 		mkdir ${group}; \
 		touch ${group}/authorized_keys; \
+	  echo "Group created!"
+	  echo "Run 'make add_key group=${group} key=\"ssh-rsa AAAAB3N...UH0= key-comment\"' to add a new key"
 	fi
-	@echo "Group created!"
-	@echo "Run 'make add_key group=${group} key=\"ssh-rsa AAAAB3N...UH0= key-comment\"' to add a new key"
 
 add_key:
-	@if [ -z "${group}" || -z "${key}" ]; then \
+	@if [ -z "${group}" ] || [ -z "${key}" ]; then \
 		echo "usage: make add_key group=my-new-group key=\"ssh-rsa AAAAB3N...UH0= key-comment\""; \
 		exit 1; \
 	else \
 		echo ${key} >> ${group}/authorized_keys; \
+	  echo "Key added!"; \
+	  echo "Run 'make sync bucket=<your-bucket>' to update the groups on s3"; \
 	fi
-	@echo "Key added!"
-	@echo "Run 'make sync' to update the groups on s3"
