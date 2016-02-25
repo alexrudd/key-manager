@@ -47,8 +47,8 @@ create_group:
 	else \
 		mkdir ${group}; \
 		touch ${group}/authorized_keys; \
-	  echo "Group created!"
-	  echo "Run 'make add_key group=${group} key=\"ssh-rsa AAAAB3N...UH0= key-comment\"' to add a new key"
+		echo "Group created!"; \
+		echo "Run 'make add_key group=${group} key=\"ssh-rsa AAAAB3N...UH0= key-comment\"' to add a new key"; \
 	fi
 
 add_key:
@@ -57,6 +57,6 @@ add_key:
 		exit 1; \
 	else \
 		echo ${key} >> ${group}/authorized_keys; \
-	  echo "Key added!"; \
-	  echo "Run 'make sync bucket=<your-bucket>' to update the groups on s3"; \
+		echo "Key added!"; \
+		echo "Run 'make sync bucket=<your-bucket>' to update the groups on s3"; \
 	fi
