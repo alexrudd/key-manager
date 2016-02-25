@@ -89,7 +89,7 @@ PermitRootLogin no
 /root/bin/authorizedkeys-command:
 
 ```bash
-#!/bin/bash\n",
+#!/bin/bash
 docker run --rm alexrudd/key-manager:latest -u=$1 -k=$2 -t=$3 -f=$4 -s3_bucket=myorg-keys -s3_region=eu-west-1
 docker pull alexrudd/key-manager:latest 2>&1 >/dev/null &
 exit 0
@@ -120,6 +120,8 @@ Although it's easy enough to manage the s3 access groups manually, I have also i
 * `make create_group group=new-group` - Creates a new group folder with an empty authorized_keys file
 * `make add_key group=new-group key="ssh-rsa AAA...E4YU= comment"` - Appends a key to an existing group's authorized_keys file
 
+---
+
 ## CloudFormation Example
 
 I've included a [CloudFormation](https://aws.amazon.com/cloudformation/) template which launches a single instance setup to use key-manager. You can then experiment adding tags, creating access groups, and adding/revoking keys.
@@ -147,11 +149,15 @@ ssh -v -i ~/.ssh/private-key core@<instance-ip>
 
 enable verbose debug output to see which keys are accepted/refused
 
+---
+
 ## Disclaimer
 
 I created this application to solve the problem of ssh access control on a small scale (~100 instances; <10 developers) and mainly to prove the concept of an idea I had. I make **no claims** as to its fitness for production or large-scale environments, and would advise you to fully understand the the code and various points of failure of the solution before you think of using it yourself.
 
 Saying that, I welcome any suggestions that could make this project safer, faster, and better suited to the problem at hand.
+
+---
 
 ## Building
 
