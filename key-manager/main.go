@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -130,6 +131,10 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 	}
 	debug("recieved: ", resp.Tags)
 
+	// valiade response
+	if len(resp.Tags) == 0 {
+		return []string{}, errors.New("tag " + tag + " does not exist!")
+	}
 	// parse and return response
 	var out []string
 	for _, s := range strings.Split(*resp.Tags[0].Value, ",") {
