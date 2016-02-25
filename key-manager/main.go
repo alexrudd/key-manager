@@ -23,6 +23,13 @@ type awsHostContext struct {
   Region  string
 }
 
+var DEBUG bool
+func debug(m ...interface{}) {
+	if(DEBUG) {
+		fmt.Fprintf(os.Stdout, "%s\n", fmt.Sprint(m...))
+	}
+}
+
 func main() {
 	// currently not using any of the client flags
 	_ = flag.String("u", "", "The user account")
@@ -32,30 +39,40 @@ func main() {
 	groupTag := flag.String("group_tag", "access-groups", "The instance tag with csv ssh sccess groups in it")
 	s3Bucket := flag.String("s3_bucket", "keys", "The bucket where the access group public keys are stored")
 	s3Region := flag.String("s3_region", "eu-west-1", "The region in which the bucket is located")
+	debugOutput := flag.Bool("debug", false, "Enable debug output")
 	flag.Parse()
+
+	if(*debugOutput) {
+		DEBUG = true
+		debug("debug output enabled")
+		debug("grouptag:  ", *groupTag)
+		debug("bucket:    ", *s3Bucket)
+		debug("region:    ", *s3Region)
+	}
 
 	// get aws host context
 	hctx, err := getAwsHostContext()
 	if err != nil {
-		fmt.Println(err.Error())
+		debug(err.Error())
 		os.Exit(1)
 	}
 
 	// get the list of access groups the intance belongs to
 	accessGroups, err := getInstanceAccessGroups(hctx, *groupTag)
 	if err != nil {
-		fmt.Println(err.Error())
+		debug(err.Error())
 		os.Exit(1)
 	}
 
 	// get the authorized_keys files for those instances
 	authorizedKeys, err := getAccessKeys(hctx, *s3Bucket, *s3Region, accessGroups)
 	if err != nil {
-		fmt.Println(err.Error())
+		debug(err.Error())
 		os.Exit(1)
 	}
 
 	// print all authorized_keys
+	debug("print all group keys:")
 	for _, k := range authorizedKeys {
 		fmt.Print(k)
 	}
@@ -78,12 +95,14 @@ func getAwsHostContext() (*awsHostContext, error) {
     return nil, err
   }
   hctx.Id = id
+	debug("instance-id: ", id)
   //get region
   region, err := svc.Region()
   if err != nil {
     return nil, err
   }
   hctx.Region = region
+	debug("region: ", region)
   return hctx, nil
 }
 
@@ -104,16 +123,19 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 		},
 	}
 	// fetch tags
+	debug("requesting tag: ", tag, ", from resource: hctx.Id", )
 	resp, err := svc.DescribeTags(params)
 	if err != nil {
 		return []string{}, err
 	}
+	debug("recieved: ", resp.Tags)
 
 	// parse and return response
 	var out []string
 	for _, s := range strings.Split(*resp.Tags[0].Value, ",") {
 		out = append(out, strings.TrimSpace(s))
 	}
+	debug("access groups: ", out)
 	return out, nil
 }
 
@@ -129,10 +151,13 @@ func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups
 			Bucket:  aws.String(s3Bucket),
 			Key:     aws.String(group + "/authorized_keys"),  // Required
 		}
+		debug("requesting authorized_keys file: s3://", s3Bucket, "/", group, "/authorized_keys")
 		resp, err := svc.GetObject(params)
 		if err != nil {
+			debug(err.Error())
 			continue
 		}
+		debug("retrieved, appending to output")
 		if b, err := ioutil.ReadAll(resp.Body); err == nil {
     	out = append(out, string(b))
 		}
