@@ -1,7 +1,26 @@
-bucket=mybucket
+bucket=myorg-keys
 region=eu-west-1
 group=""
 key=""
+
+default:
+	@echo ""
+	@echo "	make install_awscli"
+	@echo "		installs the aws cli using pip and starts configuration wizard"
+	@echo ""
+	@echo "	make fetch_existing bucket=myorg-keys"
+	@echo "		downloads all the current access groups stored in your s3 bucket"
+	@echo ""
+	@echo "	make sync bucket=myorg-keys"
+	@echo "		uploads any changes you've made locally to your s3 access groups"
+	@echo "		!! This will delete any group that exists in s3 but not locally !!"
+	@echo ""
+	@echo "	make create_group group=new-group"
+	@echo "		Creates a new group folder with an empty authorized_keys file"
+	@echo ""
+	@echo "	make add_key group=new-group key=\"ssh-rsa AAA...E4YU= comment\""
+	@echo "		appends a key to an existing group's authorized_keys file"
+	@echo ""
 
 install_awscli:
 	@echo "installing aws cli..."
