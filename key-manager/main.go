@@ -124,7 +124,7 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 		},
 	}
 	// fetch tags
-	debug("requesting tag: ", tag, ", from resource: hctx.Id", )
+	debug("requesting tag: ", tag, ", from resource: ", hctx.Id)
 	resp, err := svc.DescribeTags(params)
 	if err != nil {
 		return []string{}, err
