@@ -114,9 +114,10 @@ If you'd rather use a different tag key to the default "access-groups", then tha
 
 Although it's easy enough to manage the s3 access groups manually, I have also included a basic [management Makefile](s3keys/Makefile) which uses aws cli to provide basic functionality for fetching existing groups, creating new groups, adding keys to groups, and syncing local changes with s3:
 
+* `make ` - displays usage help
 * `make install_awscli` - installs the aws cli using pip and starts to configuration wizard
 * `make fetch_existing bucket=myorg-keys` - downloads all the current access groups stored in your s3 bucket
-* `make sync bucket=myorg-keys` - uploads any changes you've made locally to s3 `this will delete any group that exists in s3 but not locally`
+* `make sync bucket=myorg-keys` - uploads any changes you've made locally to s3 **this will delete any group that exists in s3 but not locally**
 * `make create_group group=new-group` - Creates a new group folder with an empty authorized_keys file
 * `make add_key group=new-group key="ssh-rsa AAA...E4YU= comment"` - Appends a key to an existing group's authorized_keys file
 
