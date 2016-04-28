@@ -1,10 +1,20 @@
 name=key-manager
 registry=alexrudd
 gitrepo=github.com/alexrudd
-tag=1.1
+tag=1.2
 go_ver=1.6
 
-default: run
+default:
+	@echo ""
+	@echo "	make build"
+	@echo "		compiles the key-manager app and builds the docker image"
+	@echo ""
+	@echo "	make run"
+	@echo "		runs the docker image in the background (stops any existing container)"
+	@echo ""
+	@echo "	make stop"
+	@echo "		stops the running key-manager container"
+	@echo ""
 
 run: stop
 	docker run \
@@ -16,7 +26,7 @@ runt:
 	docker run \
 	--rm \
 	-ti \
-	${registry}/${name}:${tag}
+	${registry}/${name}:${tag} -debug
 
 stop:
 	docker rm -f `docker ps -a | grep ${name} | head -n 1 | cut -d ' ' -f 1` || true
