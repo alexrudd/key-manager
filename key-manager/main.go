@@ -9,25 +9,25 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-  "github.com/aws/aws-sdk-go/aws/session"
-  "github.com/aws/aws-sdk-go/aws/credentials"
-  "github.com/aws/aws-sdk-go/aws/ec2metadata"
-  "github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type awsHostContext struct {
-  Creds   *credentials.Credentials
-  Id      string
-  Region  string
+	Creds   *credentials.Credentials
+	Id      string
+	Region  string
 }
 
 var DEBUG bool
 func debug(m ...interface{}) {
 	if(DEBUG) {
-		fmt.Fprintf(os.Stdout, "%s\n", fmt.Sprint(m...))
+		fmt.Println(m...)
 	}
 }
 
@@ -46,9 +46,10 @@ func main() {
 	if(*debugOutput) {
 		DEBUG = true
 		debug("debug output enabled")
-		debug("grouptag:  ", *groupTag)
-		debug("bucket:    ", *s3Bucket)
-		debug("region:    ", *s3Region)
+		debug("grouptag: ", *groupTag)
+		debug("bucket:   ", *s3Bucket)
+		debug("region:   ", *s3Region)
+		debug("")
 	}
 
 	// get aws host context
@@ -81,30 +82,30 @@ func main() {
 
 
 func getAwsHostContext() (*awsHostContext, error) {
-  //setup
-  hctx := new(awsHostContext)
-  cfg := aws.NewConfig()
-  svc := ec2metadata.New(session.New(), cfg)
-  p := &ec2rolecreds.EC2RoleProvider{
+	//setup
+	hctx := new(awsHostContext)
+	cfg := aws.NewConfig()
+	svc := ec2metadata.New(session.New(), cfg)
+	p := &ec2rolecreds.EC2RoleProvider{
 		Client: svc,
 	}
-  //get creds
-  hctx.Creds = credentials.NewCredentials(p)
-  //get instance id
-  id, err := svc.GetMetadata("instance-id")
-  if err != nil {
-    return nil, err
-  }
-  hctx.Id = id
-	debug("instance-id: ", id)
-  //get region
-  region, err := svc.Region()
-  if err != nil {
-    return nil, err
-  }
-  hctx.Region = region
-	debug("region: ", region)
-  return hctx, nil
+	//get creds
+	hctx.Creds = credentials.NewCredentials(p)
+	//get instance id
+	id, err := svc.GetMetadata("instance-id")
+	if err != nil {
+		return nil, err
+	}
+	hctx.Id = id
+	debug("instance-id:", id)
+	//get region
+	region, err := svc.Region()
+	if err != nil {
+		return nil, err
+	}
+	hctx.Region = region
+	debug("region:     ", region)
+	return hctx, nil
 }
 
 
@@ -124,12 +125,12 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 		},
 	}
 	// fetch tags
-	debug("requesting tag: ", tag, ", from resource: ", hctx.Id)
+	debug("requesting tag: " + tag + ", from resource: " + hctx.Id)
 	resp, err := svc.DescribeTags(params)
 	if err != nil {
 		return []string{}, err
 	}
-	debug("recieved: ", resp.Tags)
+	debug("recieved:", resp.Tags)
 
 	// valiade response
 	if len(resp.Tags) == 0 {
@@ -140,7 +141,7 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 	for _, s := range strings.Split(*resp.Tags[0].Value, ",") {
 		out = append(out, strings.TrimSpace(s))
 	}
-	debug("access groups: ", out)
+	debug("access groups:", out)
 	return out, nil
 }
 
@@ -156,7 +157,7 @@ func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups
 			Bucket:  aws.String(s3Bucket),
 			Key:     aws.String(group + "/authorized_keys"),  // Required
 		}
-		debug("requesting authorized_keys file: s3://", s3Bucket, "/", group, "/authorized_keys")
+		debug("requesting authorized_keys file: s3://" + s3Bucket + "/" + group + "/authorized_keys")
 		resp, err := svc.GetObject(params)
 		if err != nil {
 			debug(err.Error())
@@ -164,7 +165,7 @@ func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups
 		}
 		debug("retrieved, appending to output")
 		if b, err := ioutil.ReadAll(resp.Body); err == nil {
-    	out = append(out, string(b))
+		out = append(out, string(b))
 		}
 	}
 
