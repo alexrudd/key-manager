@@ -37,7 +37,7 @@ func main() {
 	_ = flag.String("k", "", "The public key proffered by the client")
 	_ = flag.String("t", "", "The key encryption type")
 	_ = flag.String("f", "", "The fingerprint of the public key")
-	groupTag := flag.String("group_tag", "access-groups", "The instance tag with csv ssh sccess groups in it")
+	groupTag := flag.String("group_tag", "access-groups", "The instance tag with csv ssh access groups in it")
 	s3Bucket := flag.String("s3_bucket", "keys", "The bucket where the access group public keys are stored")
 	s3Region := flag.String("s3_region", "eu-west-1", "The region in which the bucket is located")
 	debugOutput := flag.Bool("debug", false, "Enable debug output")
@@ -130,7 +130,7 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 	if err != nil {
 		return []string{}, err
 	}
-	debug("recieved:", resp.Tags)
+	debug("received:", resp.Tags)
 
 	// valiade response
 	if len(resp.Tags) == 0 {
