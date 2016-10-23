@@ -34,13 +34,13 @@ stop:
 build: gobuild dockbuild
 
 dockbuild:
-	[ -e ca-certificates.crt ] || wget https://curl.haxx.se/ca/cacert.pem -O ca-certificates.crt
+	[ -e ca-certificates.crt ] || curl https://curl.haxx.se/ca/cacert.pem -o ca-certificates.crt
 	docker build -t ${registry}/${name}:${tag} .
 
 gobuild:
 	# copy src
 	mkdir -p _src/${gitrepo}/${name}
-	cp -r `ls -l | grep '^d' |awk '{ print $$9 }' | grep -vE '^_'` _src/${gitrepo}/${name}
+	cp -r `ls -l | grep '^d' |awk '{ print $$NF }' | grep -vE '^_'` _src/${gitrepo}/${name}
 	# compile
 	docker run \
 	-v `pwd`:/go/src/${gitrepo}/${name} \
