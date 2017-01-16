@@ -9,7 +9,9 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/session"
+	
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -86,11 +88,15 @@ func getAwsHostContext() (*awsHostContext, error) {
 	hctx := new(awsHostContext)
 	cfg := aws.NewConfig()
 	svc := ec2metadata.New(session.New(), cfg)
-	p := &ec2rolecreds.EC2RoleProvider{
-		Client: svc,
+
+	// Get credentials:
+	// Environment variables > local aws config file > remote role provider
+	// https://github.com/aws/aws-sdk-go/blob/master/aws/defaults/defaults.go#L88
+	hctx.Creds = defaults.CredChain(defaults.Config(), defaults.Handlers())
+	if _, err = hctx.Creds.Get(); err != nil {
+		// We couldn't get any credentials
+		return nil, err
 	}
-	//get creds
-	hctx.Creds = credentials.NewCredentials(p)
 	//get instance id
 	id, err := svc.GetMetadata("instance-id")
 	if err != nil {
