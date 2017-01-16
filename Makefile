@@ -39,14 +39,13 @@ dockbuild:
 
 gobuild:
 	# copy src
-	mkdir -p _src/${gitrepo}/${name}
-	cp -r `ls -l | grep '^d' |awk '{ print $$NF }' | grep -vE '^_'` _src/${gitrepo}/${name}
+	mkdir -p _src/${gitrepo}/${name} _pkg _bin
+	cp -r key-manager/* _src/${gitrepo}/${name}
 	# compile
 	docker run \
-	-v `pwd`:/go/src/${gitrepo}/${name} \
-	-v `pwd`/_pkg:/go/pkg \
-	-v `pwd`/_bin:/go/bin \
-	-v `pwd`/_src:/go/src \
+	-v `pwd`/_pkg:/go/pkg:Z \
+	-v `pwd`/_bin:/go/bin:Z \
+	-v `pwd`/_src:/go/src:Z \
 	-e CGO_ENABLED=0 \
 	-e GOOS=linux  \
 	golang:${go_ver} \
