@@ -31,11 +31,18 @@ runt:
 stop:
 	docker rm -f `docker ps -a | grep ${name} | head -n 1 | cut -d ' ' -f 1` || true
 
-build: gobuild dockbuild
+build: gofmt gobuild dockbuild
 
 dockbuild:
 	[ -e ca-certificates.crt ] || curl -Lsf https://curl.haxx.se/ca/cacert.pem -o ca-certificates.crt
 	docker build -t ${registry}/${name}:${tag} .
+
+gofmt:
+	# format
+	docker run \
+	-v `pwd`/key-manager:/go/src/key-manager:Z \
+	golang:${go_ver} \
+	go fmt ./src/key-manager/...
 
 gobuild:
 	# copy src

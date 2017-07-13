@@ -9,24 +9,26 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type awsHostContext struct {
-	Creds   *credentials.Credentials
-	Id      string
-	Region  string
+	Creds  *credentials.Credentials
+	ID     string
+	Region string
 }
 
+// DEBUG enable debugging output using -debug flag
 var DEBUG bool
+
 func debug(m ...interface{}) {
-	if(DEBUG) {
+	if DEBUG {
 		fmt.Println(m...)
 	}
 }
@@ -43,7 +45,7 @@ func main() {
 	debugOutput := flag.Bool("debug", false, "Enable debug output")
 	flag.Parse()
 
-	if(*debugOutput) {
+	if *debugOutput {
 		DEBUG = true
 		debug("debug output enabled")
 		debug("grouptag: ", *groupTag)
@@ -80,7 +82,6 @@ func main() {
 	}
 }
 
-
 func getAwsHostContext() (*awsHostContext, error) {
 	//setup
 	hctx := new(awsHostContext)
@@ -96,7 +97,7 @@ func getAwsHostContext() (*awsHostContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	hctx.Id = id
+	hctx.ID = id
 	debug("instance-id:", id)
 	//get region
 	region, err := svc.Region()
@@ -108,24 +109,23 @@ func getAwsHostContext() (*awsHostContext, error) {
 	return hctx, nil
 }
 
-
 func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error) {
 	// setup
 	svc := ec2.New(session.New(aws.NewConfig().WithCredentials(hctx.Creds).WithRegion(hctx.Region)))
 	params := &ec2.DescribeTagsInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String("resource-id"),
-				Values: []*string{ aws.String(hctx.Id) },
+				Name:   aws.String("resource-id"),
+				Values: []*string{aws.String(hctx.ID)},
 			},
 			{
-				Name: aws.String("key"),
-				Values: []*string{ aws.String(tag) },
+				Name:   aws.String("key"),
+				Values: []*string{aws.String(tag)},
 			},
 		},
 	}
 	// fetch tags
-	debug("requesting tag: " + tag + ", from resource: " + hctx.Id)
+	debug("requesting tag: " + tag + ", from resource: " + hctx.ID)
 	resp, err := svc.DescribeTags(params)
 	if err != nil {
 		return []string{}, err
@@ -145,7 +145,6 @@ func getInstanceAccessGroups(hctx *awsHostContext, tag string) ([]string, error)
 	return out, nil
 }
 
-
 func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups []string) ([]string, error) {
 	// setup
 	svc := s3.New(session.New(aws.NewConfig().WithCredentials(hctx.Creds).WithRegion(s3Region)))
@@ -154,8 +153,8 @@ func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups
 	// fetch authorized_keys files
 	for _, group := range accessGroups {
 		params := &s3.GetObjectInput{
-			Bucket:  aws.String(s3Bucket),
-			Key:     aws.String(group + "/authorized_keys"),  // Required
+			Bucket: aws.String(s3Bucket),
+			Key:    aws.String(group + "/authorized_keys"), // Required
 		}
 		debug("requesting authorized_keys file: s3://" + s3Bucket + "/" + group + "/authorized_keys")
 		resp, err := svc.GetObject(params)
@@ -165,7 +164,7 @@ func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups
 		}
 		debug("retrieved, appending to output")
 		if b, err := ioutil.ReadAll(resp.Body); err == nil {
-		out = append(out, string(b))
+			out = append(out, string(b))
 		}
 	}
 
