@@ -34,7 +34,7 @@ stop:
 build: gobuild dockbuild
 
 dockbuild:
-	[ -e ca-certificates.crt ] || curl https://curl.haxx.se/ca/cacert.pem -o ca-certificates.crt
+	[ -e ca-certificates.crt ] || curl -Lsf https://curl.haxx.se/ca/cacert.pem -o ca-certificates.crt
 	docker build -t ${registry}/${name}:${tag} .
 
 gobuild:
