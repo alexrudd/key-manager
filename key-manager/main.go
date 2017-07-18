@@ -164,7 +164,7 @@ func getAccessKeys(hctx *awsHostContext, s3Bucket, s3Region string, accessGroups
 		}
 		debug("retrieved, appending to output")
 		if b, err := ioutil.ReadAll(resp.Body); err == nil {
-			out = append(out, string(b))
+			out = append(out, "\n# Group: "+group+"\n"+string(b))
 		}
 	}
 
