@@ -1,7 +1,7 @@
 name=key-manager
 registry=alexrudd
 gitrepo=github.com/alexrudd
-tag=2.0
+tag=2.1
 go_ver=1.9
 
 default:

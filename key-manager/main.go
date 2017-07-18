@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -33,6 +34,12 @@ func debug(m ...interface{}) {
 	}
 }
 
+func errorMsg(err error) {
+	re := regexp.MustCompile(`\r?\n`)
+	msg := re.ReplaceAllString(err.Error(), "\n# ")
+	fmt.Println("#", msg)
+}
+
 func main() {
 	// currently not using any of the client flags
 	_ = flag.String("u", "", "The user account")
@@ -57,21 +64,21 @@ func main() {
 	// get aws host context
 	hctx, err := getAwsHostContext()
 	if err != nil {
-		debug(err.Error())
+		errorMsg(err)
 		os.Exit(1)
 	}
 
 	// get the list of access groups the intance belongs to
 	accessGroups, err := getInstanceAccessGroups(hctx, *groupTag)
 	if err != nil {
-		debug(err.Error())
+		errorMsg(err)
 		os.Exit(1)
 	}
 
 	// get the authorized_keys files for those instances
 	authorizedKeys, err := getAccessKeys(hctx, *s3Bucket, *s3Region, accessGroups)
 	if err != nil {
-		debug(err.Error())
+		errorMsg(err)
 		os.Exit(1)
 	}
 
