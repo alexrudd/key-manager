@@ -1,8 +1,8 @@
 name=key-manager
 registry=alexrudd
 gitrepo=github.com/alexrudd
-tag=1.2
-go_ver=1.6
+tag=2.0
+go_ver=1.9
 
 default:
 	@echo ""
